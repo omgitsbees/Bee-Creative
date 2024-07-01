@@ -1,0 +1,54 @@
+import requests
+
+def get_exchange_rate(api_key, base_currency, target_currency):
+    base_url = f'https://v6.exchangerate-api.com/v6/{api_key}/latest/{base_currency}'
+    
+    try:
+        response = requests.get(base_url)
+        data = response.json()
+
+        if data['result'] == 'success':
+            exchange_rate = data['conversion_rates'].get(target_currency)
+            if exchange_rate:
+                return exchange_rate
+            else:
+                print(f"Currency '{target_currency}' not found.")
+                return None
+        else:
+            print(f"Error: {data['error-type']}")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching exchange rates: {e}")
+        return None
+
+def convert_currency(api_key, amount, base_currency, target_currency):
+    exchange_rate = get_exchange_rate(api_key, base_currency, target_currency)
+    if exchange_rate:
+        converted_amount = amount * exchange_rate
+        return converted_amount
+    else:
+        return None
+
+def main():
+    print("Welcome to the Currency Converter App!")
+    
+    try:
+        amount = float(input("Enter amount to convert: "))
+    except ValueError:
+        print("Invalid amount entered. Please enter a numeric value.")
+        return
+    
+    base_currency = input("Enter base currency (e.g., USD, EUR): ").upper()
+    target_currency = input("Enter target currency (e.g., USD, EUR): ").upper()
+
+    api_key = '18d531d3d525ca22d939cf6d'  # Replace with your actual ExchangeRate-API key
+
+    converted_amount = convert_currency(api_key, amount, base_currency, target_currency)
+    if converted_amount is not None:
+        print(f"\n{amount} {base_currency} = {converted_amount:.2f} {target_currency}")
+    else:
+        print("Conversion failed. Please check your input.")
+
+if __name__ == "__main__":
+    main()
